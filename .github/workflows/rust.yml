@@ -17,12 +17,23 @@ jobs:
     steps:
     - uses: actions/checkout@v4
 
+    # Set up caching for Cargo dependencies
+    - name: Cache Cargo dependencies
+      uses: actions/cache@v3
+      with:
+        path: |
+          ~/.cargo/registry
+          ~/.cargo/git
+        key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+        restore-keys: |
+          ${{ runner.os }}-cargo-
+
     # Install Rust using rustup
     - name: Set up Rust (nightly)
       uses: actions-rs/toolchain@v1
       with:
         toolchain: nightly
-        override: true  # Set nightly as the default version for the workflow
+        override: true 
 
     - name: Build
       run: cargo build --verbose
