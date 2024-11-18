@@ -73,7 +73,7 @@ where
         // Create a task to send messages to the broker
         let messages = std::mem::take(&mut *buffer);
         let broker = self.broker.clone();
-        let producer_id = self.producer_id.clone();
+        let _producer_id = self.producer_id.clone();
 
         for message in messages {
             // Wrap the message in a Box<dyn Message>
