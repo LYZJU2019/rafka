@@ -16,6 +16,14 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
+
+    # Install Rust using rustup
+    - name: Set up Rust (nightly)
+      uses: actions-rs/toolchain@v1
+      with:
+        toolchain: nightly
+        override: true  # Set nightly as the default version for the workflow
+
     - name: Build
       run: cargo build --verbose
     - name: Run tests
