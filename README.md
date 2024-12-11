@@ -1,6 +1,10 @@
 # Rafka
 
-An implementation of a simple message broker, producer, and consumer system in Rust, inspired by Apache Kafka. This project demonstrates how to integrate various components such as a broker, producer, consumer, storage engine, and hooks within a Rust-based asynchronous system.
+  Rafka is a blazing-fast, experimental distributed asynchronous message broker written in Rust. Inspired by Apache Kafka, it stands out with its peer-to-peer mesh architecture and custom in-memory database for unparalleled scalability and low-latency performance. Leveraging a P2P mesh inspired by Pastry and Chord, Rafka ensures hyper-scalability and efficient message routing. Each broker node features a built-in in-memory "sidecar" database for storing frequently accessed data, minimizing storage trips and optimizing responses for repetitive queries. Metadata management uses a distributed hash table (DHT) model for fault tolerance and seamless coordination. Designed for Kubernetes-native deployment, Rafka dynamically scales, avoids single points of failure, and excels in modern distributed environments.
+
+### Current Status: Early Development
+
+This project is in active development and **Not ready for production use**. 
 
 ## Table of Contents
 
@@ -17,9 +21,6 @@ An implementation of a simple message broker, producer, and consumer system in R
   - [Producer](#producer)
   - [Consumer](#consumer)
   - [Storage](#storage)
-  - [Hooks](#hooks)
-- [Usage Example](#usage-example)
-- [Configuration](#configuration)
 - [Contributing](#contributing)
 - [License](#license)
 - [Acknowledgments](#acknowledgments)
@@ -33,10 +34,9 @@ This project serves as a learning tool for understanding how messaging systems w
 ## Features
 
 - **Broker Implementation**: Manages producers and consumers, dispatches messages, and integrates with storage engines and hooks.
+- **Peer-Peer Mesh**: Creates a distributed layer around the system allowing for direct broker-broker communication in log(n) lookup time
 - **Producers and Consumers**: Simple implementations that interact with the broker to send and receive messages.
-- **Storage Engines**: In-memory and RocksDB storage engines for persisting messages.
-- **Hooks**: Support for hooks that can modify requests and responses or execute custom logic at various stages.
-- **Configurable Components**: Components that can be configured via configuration files.
+- **Storage Engines**: Builtin In-memoryDB storage for persisting messages.
 - **Asynchronous Processing**: Uses asynchronous programming with Tokio for high performance.
 
 ## Directory Structure
@@ -46,6 +46,10 @@ rafka/
 ├── Cargo.toml           # Workspace manifest
 ├── config/              # Configuration files
 │   └── config.yaml
+├── scripts/             # Tests and Examples       
+│   ├── helloworld.sh         
+│   ├── partition_demo.sh        
+│   └── storage_demo.sh        
 ├── src/                 # Main binary crate
 │   └── main.rs
 ├── crates/              # Directory for all crates
@@ -54,9 +58,7 @@ rafka/
 │   ├── producer/        # Producer implementation
 │   ├── consumer/        # Consumer implementation
 │   ├── storage/         # Storage engines
-│   ├── hooks/           # Hooks and events
-│   └── utils/           # Utility functions and common code
-└── tests/               # Integration tests
+└── 
 ```
 
 ## Getting Started
@@ -65,7 +67,6 @@ rafka/
 
 - **Rust**: Install Rust (latest stable version recommended) from [rustup.rs](https://rustup.rs/).
 - **Cargo**: Comes with Rust installation.
-- **RocksDB**: If you plan to use the RocksDB storage engine, ensure you have the necessary dependencies installed.
 
 ### Building the Project
 
@@ -98,54 +99,110 @@ This will execute the main.rs file, which sets up the broker, producer, and cons
 
 The rafka_core crate defines the core traits and interfaces used throughout the system, including:
 
-- `Broker`: Trait for broker implementations.
-- `Producer`: Trait for producer implementations.
-- `Consumer`: Trait for consumer implementations.
-- `StorageEngine`: Trait for storage engine implementations.
-- `Message`: Trait representing a message.
+- `Message`: Message Types and Handling.
 
 ### Broker
 
-The `broker` crate contains the SimpleBroker implementation, which manages producers and consumers, dispatches messages, and integrates with storage engines and hooks.
+The `broker` crate contains the broker logic and handeling, topics and partition management.
 
 ### Producer
 
-The `producer` crate provides the SimpleProducer, which buffers messages and sends them to the broker.
+The `producer` crate provides the Producers, which buffers messages and sends them to the broker.
 
 ### Consumer
 
-The `consumer` crate provides the SimpleConsumer, which receives messages from the broker.
+The `consumer` crate provides the Consumer, which subscribes to topics to receives messages from the broker.
 
 ### Storage
 
 The `storage` crate provides implementations of storage engines:
 
-- `InMemoryStorage`: An in-memory storage engine with write-ahead log (WAL) and snapshot capabilities.
-- `RocksDBStorage`: A storage engine using RocksDB for persistent storage.
+## Rafka Development Checklist
 
-### Hooks
+#### Phase 1: Core Foundation
+1. **Basic P2P Communication**
+   - [ ] Implement node-to-node communication
+   - [ ] Set up gRPC server and client
+   - [x] Create basic message structures
+   - [ ] Implement simple node discovery
 
-The `hooks` crate defines hook traits and allows for custom logic to be executed at various stages of processing.
+2. **Message Handling**
+   - [ ] Develop asynchronous message queue
+   - [x] Implement basic producer/consumer logic
+   - [x] Create basic message storage functionality
+   - [ ] Set up error handling
 
-## Usage Example
+#### Phase 2: Distributed Systems
+1. **Consensus & Coordination**
+   - [ ] Implement consensus algorithm
+   - [ ] Develop leader election mechanism
+   - [ ] Create cluster state management
+   - [ ] Set up configuration sharing between nodes
 
-The `src/main.rs` file demonstrates how to set up and run the system
+2. **Data Management**
+   - [ ] Implement message replication across nodes
+   - [ ] Develop partition management logic
+   - [ ] Create consistency checks for data integrity
+   - [ ] Set up backup mechanisms
 
-## Configuration
+#### Phase 3: Production Readiness
+1. **Kubernetes Integration**
+   - [ ] Create basic Kubernetes deployment configuration
+   - [ ] Implement StatefulSet for stable storage
+   - [ ] Set up service discovery within Kubernetes
+   - [ ] Develop auto-scaling logic for brokers and consumers
 
-Components can be configured via configuration files or programmatically. For example, the storage engine can be configured to use different storage types.
+2. **Monitoring & Reliability**
+   - [ ] Implement basic metrics collection
+   - [ ] Set up health checks for brokers and services
+   - [ ] Create monitoring dashboards (e.g., Prometheus, Grafana)
+   - [ ] Define alerting rules for failures or bottlenecks
 
-Example `config.yaml`:
+#### Phase 4: Performance & Security
+1. **Performance Optimization**
+   - [ ] Implement message batching for efficiency
+   - [ ] Add message compression for reduced network load
+   - [ ] Optimize network resource usage (e.g., reduce latency)
+   - [ ] Create caching layer for frequently accessed data
 
-```yaml
-storage:
-  storage_type: "rocksdb"
-  path: "./data/rocksdb"
-```
+2. **Security Implementation**
+   - [ ] Enable TLS encryption for secure communication
+   - [ ] Implement user authentication (OAuth2)
+   - [ ] Set up authorization mechanisms (role-based access control)
+   - [ ] Implement audit logging for security monitoring
+
+#### Phase 5: Client SDK & Documentation
+1. **Client Development**
+   - [ ] Create a Rust client SDK for message production and consumption
+   - [ ] Develop example applications using the SDK
+   - [ ] Implement client-side monitoring (e.g., message processing time)
+   - [ ] Create client documentation and setup guides
+
+2. **Documentation**
+   - [ ] Write comprehensive getting started guide
+   - [ ] Create detailed API documentation
+   - [ ] Develop deployment guide for both local and cloud environments
+   - [ ] Add troubleshooting guide to help users resolve common issues
+
+#### Additional Categories
+
+1. **Network Resilience Strategies**
+   - [ ] Implement network redundancy (multiple paths and regions)
+   - [ ] Set up load balancing to distribute traffic evenly
+   - [ ] Configure fault detection and self-healing mechanisms
+   - [ ] Implement traffic shaping and prioritization (e.g., QoS, rate limiting)
+   - [ ] Add retry logic with exponential backoff and circuit breakers
+
+2. **High Availability & Scalability**
+   - [ ] Ensure data and services are replicated across multiple nodes
+   - [ ] Set up auto-scaling for brokers and consumers based on load
+   - [ ] Configure dynamic partitioning to scale with traffic
+   - [ ] Implement horizontal scaling for both producers and consumers
+
 
 ## Contributing
 
-Contributions are welcome! Please open issues and submit pull requests for any features or bug fixes.
+We welcome all contributions! The project is in very early stages, so there are many areas to help; listed in the checklist above.
 
 ## License
 
@@ -155,6 +212,5 @@ This project is licensed under the MIT License - see the [LICENSE](./LICENSE) fi
 
 - [Apache Kafka](https://kafka.apache.org) for inspiration on messaging systems.
 - [Tokio](https://tokio.rs) for asynchronous runtime support.
-- [RocksDB](https://rocksdb.org) for storage capabilities.
 - [@wyattgill9](https://github.com/wyattgill9) for the PoC.
 - The Rust community for their excellent libraries and support.
