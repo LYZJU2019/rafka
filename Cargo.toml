@@ -18,9 +18,11 @@ path = "src/bin/start_broker.rs"
 [dependencies]
 rafka-broker = { path = "crates/broker" }
 rafka-core = { path = "crates/core" }
+rafka-dht = {path = "crates/dht"}
 rafka-producer = { path = "crates/producer" }
 rafka-consumer = { path = "crates/consumer" }
 rafka-storage = { path = "crates/storage" }
+
 tokio = { version = "1.0", features = ["full"] }
 chrono = { version = "0.4", features = ["serde"] }
 
